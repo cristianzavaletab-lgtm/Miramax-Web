@@ -8,6 +8,11 @@ from .models import Payment, MonthlyFee, Service, ConfigPreciosZona
 from .serializers import PaymentSerializer, MonthlyFeeSerializer, ServiceSerializer, ConfigPreciosZonaSerializer
 from .utils import generate_payment_receipt
 
+class ServiceViewSet(viewsets.ModelViewSet):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    permission_classes = [IsAuthenticated]
+
 class ConfigPreciosZonaViewSet(viewsets.ModelViewSet):
     """
     ViewSet para configurar precios por zona.
