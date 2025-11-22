@@ -12,11 +12,12 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = await login(username, password);
-        if (success) {
+        setError('');
+        const result = await login(username, password);
+        if (result.success) {
             navigate('/dashboard');
         } else {
-            setError('Credenciales inválidas');
+            setError(result.error);
         }
     };
 

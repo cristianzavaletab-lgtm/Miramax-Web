@@ -30,20 +30,34 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('refresh_token', refresh);
 
             if (userData) {
-                // Si el backend devuelve user data, usarlo
                 localStorage.setItem('user_data', JSON.stringify(userData));
                 setUser(userData);
             } else {
-                // Si no, hacer una llamada adicional para obtener el perfil
                 const userResponse = await api.get('users/me/');
                 localStorage.setItem('user_data', JSON.stringify(userResponse.data));
                 setUser(userResponse.data);
             }
 
-            return true;
+            return { success: true };
         } catch (error) {
             console.error("Login failed", error);
-            return false;
+            let errorMessage = 'Error al iniciar sesión';
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                if (error.response.status === 401) {
+                    errorMessage = 'Credenciales inválidas';
+                } else {
+                    errorMessage = `Error del servidor: ${error.response.status}`;
+                }
+            } else if (error.request) {
+                // The request was made but no response was received
+                errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión.';
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                errorMessage = error.message;
+            }
+            return { success: false, error: errorMessage };
         }
     };
 
