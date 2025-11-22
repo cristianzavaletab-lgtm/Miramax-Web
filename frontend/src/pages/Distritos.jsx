@@ -16,7 +16,7 @@ const Distritos = () => {
     const [departamentos, setDepartamentos] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [formData, setFormData] = useState({ name: '', province: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', province: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [filterProv, setFilterProv] = useState('');
@@ -58,10 +58,10 @@ const Distritos = () => {
     const handleOpen = (distrito = null) => {
         if (distrito) {
             setEditingId(distrito.id);
-            setFormData({ name: distrito.name, province: distrito.province });
+            setFormData({ name: distrito.name, code: distrito.code, province: distrito.province });
         } else {
             setEditingId(null);
-            setFormData({ name: '', province: '' });
+            setFormData({ name: '', code: '', province: '' });
         }
         setOpen(true);
         setError('');
@@ -70,7 +70,7 @@ const Distritos = () => {
     const handleClose = () => {
         setOpen(false);
         setEditingId(null);
-        setFormData({ name: '', province: '' });
+        setFormData({ name: '', code: '', province: '' });
         setError('');
     };
 
@@ -88,7 +88,12 @@ const Distritos = () => {
             setTimeout(() => setSuccess(''), 3000);
         } catch (error) {
             console.error('Error saving distrito:', error);
-            setError('Error al guardar distrito');
+            if (error.response?.data) {
+                const errorMsg = Object.values(error.response.data).flat().join(', ');
+                setError(`Error al guardar: ${errorMsg}`);
+            } else {
+                setError('Error al guardar distrito');
+            }
         }
     };
 
@@ -162,7 +167,7 @@ const Distritos = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ bgcolor: 'primary.main' }}>
-                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Código</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Nombre</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Provincia</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Departamento</TableCell>
@@ -172,7 +177,7 @@ const Distritos = () => {
                     <TableBody>
                         {filteredDistritos.map((dist) => (
                             <TableRow key={dist.id} hover>
-                                <TableCell>{dist.id}</TableCell>
+                                <TableCell>{dist.code}</TableCell>
                                 <TableCell>{dist.name}</TableCell>
                                 <TableCell>{getProvinceName(dist.province)}</TableCell>
                                 <TableCell>{getDepartmentName(dist.province)}</TableCell>
@@ -231,6 +236,17 @@ const Distritos = () => {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         margin="normal"
                         required
+                        helperText="Ej: Trujillo Centro, La Esperanza, El Porvenir"
+                    />
+                    <TextField
+                        fullWidth
+                        label="Código del Distrito"
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        margin="normal"
+                        required
+                        inputProps={{ maxLength: 10 }}
+                        helperText="Código único (max 10 caracteres). Ej: TRU-C, ESP, POR"
                     />
                 </DialogContent>
                 <DialogActions>
@@ -238,7 +254,7 @@ const Distritos = () => {
                     <Button
                         onClick={handleSubmit}
                         variant="contained"
-                        disabled={!formData.name.trim() || !formData.province}
+                        disabled={!formData.name.trim() || !formData.code.trim() || !formData.province}
                     >
                         {editingId ? 'Actualizar' : 'Crear'}
                     </Button>

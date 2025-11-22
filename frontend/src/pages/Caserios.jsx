@@ -17,7 +17,7 @@ const Caserios = () => {
     const [departamentos, setDepartamentos] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [formData, setFormData] = useState({ name: '', district: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', district: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [filterDist, setFilterDist] = useState('');
@@ -69,10 +69,10 @@ const Caserios = () => {
     const handleOpen = (caserio = null) => {
         if (caserio) {
             setEditingId(caserio.id);
-            setFormData({ name: caserio.name, district: caserio.district });
+            setFormData({ name: caserio.name, code: caserio.code, district: caserio.district });
         } else {
             setEditingId(null);
-            setFormData({ name: '', district: '' });
+            setFormData({ name: '', code: '', district: '' });
         }
         setOpen(true);
         setError('');
@@ -81,7 +81,7 @@ const Caserios = () => {
     const handleClose = () => {
         setOpen(false);
         setEditingId(null);
-        setFormData({ name: '', district: '' });
+        setFormData({ name: '', code: '', district: '' });
         setError('');
     };
 
@@ -99,7 +99,12 @@ const Caserios = () => {
             setTimeout(() => setSuccess(''), 3000);
         } catch (error) {
             console.error('Error saving caserio:', error);
-            setError('Error al guardar caserío');
+            if (error.response?.data) {
+                const errorMsg = Object.values(error.response.data).flat().join(', ');
+                setError(`Error al guardar: ${errorMsg}`);
+            } else {
+                setError('Error al guardar caserío');
+            }
         }
     };
 
@@ -185,7 +190,7 @@ const Caserios = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ bgcolor: 'primary.main' }}>
-                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Código</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Nombre</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Distrito</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Provincia</TableCell>
@@ -196,7 +201,7 @@ const Caserios = () => {
                     <TableBody>
                         {filteredCaserios.map((cas) => (
                             <TableRow key={cas.id} hover>
-                                <TableCell>{cas.id}</TableCell>
+                                <TableCell>{cas.code}</TableCell>
                                 <TableCell>{cas.name}</TableCell>
                                 <TableCell>{getDistrictName(cas.district)}</TableCell>
                                 <TableCell>{getProvinceName(cas.district)}</TableCell>
@@ -256,6 +261,18 @@ const Caserios = () => {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         margin="normal"
                         required
+                        autoFocus
+                        helperText="Ej: Villa del Mar, Los Pinos, Santa Rosa"
+                    />
+                    <TextField
+                        fullWidth
+                        label="Código del Caserío"
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        margin="normal"
+                        required
+                        inputProps={{ maxLength: 10 }}
+                        helperText="Código único (max 10 caracteres). Ej: VM, LP, SR"
                     />
                 </DialogContent>
                 <DialogActions>
@@ -263,7 +280,7 @@ const Caserios = () => {
                     <Button
                         onClick={handleSubmit}
                         variant="contained"
-                        disabled={!formData.name.trim() || !formData.district}
+                        disabled={!formData.name.trim() || !formData.code.trim() || !formData.district}
                     >
                         {editingId ? 'Actualizar' : 'Crear'}
                     </Button>

@@ -39,8 +39,7 @@ const Clients = () => {
         district: '',
         caserio: '',
         service_type: 'internet',
-        service_price: '',
-        status: 'active'
+        service_price: ''
     });
 
     useEffect(() => {
@@ -141,8 +140,7 @@ const Clients = () => {
                 dni: formData.dni,
                 phone: formData.phone,
                 address: formData.address,
-                caserio: formData.caserio,
-                status: formData.status
+                caserio: formData.caserio || null
             };
             const clientResponse = await api.post('clients/', clientData);
             const clientId = clientResponse.data.id;
@@ -160,10 +158,20 @@ const Clients = () => {
             setFormData({
                 name: '', dni: '', phone: '', address: '',
                 department: '', province: '', district: '', caserio: '',
-                service_type: 'internet', service_price: '', status: 'active'
+                service_type: 'internet', service_price: ''
             });
+            alert('Cliente creado exitosamente');
         } catch (error) {
             console.error("Error creating client", error);
+            console.error("Error data:", error.response?.data);
+            let errorMessage = 'Error al crear cliente';
+            if (error.response?.data) {
+                const errors = error.response.data;
+                errorMessage = Object.entries(errors)
+                    .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+                    .join('\n');
+            }
+            alert(`Error al crear cliente:\n${errorMessage}`);
         }
     };
 

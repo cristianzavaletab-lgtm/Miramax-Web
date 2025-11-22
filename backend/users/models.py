@@ -20,6 +20,7 @@ class User(AbstractUser):
         blank=True,
         related_name='usuarios'
     )
+    # sede_id_temp = models.IntegerField(null=True, blank=True)
     
     # Password reset fields
     reset_token = models.CharField(max_length=100, blank=True)

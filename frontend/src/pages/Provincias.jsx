@@ -15,7 +15,7 @@ const Provincias = () => {
     const [departamentos, setDepartamentos] = useState([]);
     const [open, setOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [formData, setFormData] = useState({ name: '', department: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', department: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [filterDept, setFilterDept] = useState('');
@@ -47,10 +47,10 @@ const Provincias = () => {
     const handleOpen = (provincia = null) => {
         if (provincia) {
             setEditingId(provincia.id);
-            setFormData({ name: provincia.name, department: provincia.department });
+            setFormData({ name: provincia.name, code: provincia.code, department: provincia.department });
         } else {
             setEditingId(null);
-            setFormData({ name: '', department: '' });
+            setFormData({ name: '', code: '', department: '' });
         }
         setOpen(true);
         setError('');
@@ -59,7 +59,7 @@ const Provincias = () => {
     const handleClose = () => {
         setOpen(false);
         setEditingId(null);
-        setFormData({ name: '', department: '' });
+        setFormData({ name: '', code: '', department: '' });
         setError('');
     };
 
@@ -77,7 +77,12 @@ const Provincias = () => {
             setTimeout(() => setSuccess(''), 3000);
         } catch (error) {
             console.error('Error saving provincia:', error);
-            setError('Error al guardar provincia');
+            if (error.response?.data) {
+                const errorMsg = Object.values(error.response.data).flat().join(', ');
+                setError(`Error al guardar: ${errorMsg}`);
+            } else {
+                setError('Error al guardar provincia');
+            }
         }
     };
 
@@ -142,7 +147,7 @@ const Provincias = () => {
                 <Table>
                     <TableHead>
                         <TableRow sx={{ bgcolor: 'primary.main' }}>
-                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                            <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Código</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Nombre</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Departamento</TableCell>
                             <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">Acciones</TableCell>
@@ -151,7 +156,7 @@ const Provincias = () => {
                     <TableBody>
                         {filteredProvincias.map((prov) => (
                             <TableRow key={prov.id} hover>
-                                <TableCell>{prov.id}</TableCell>
+                                <TableCell>{prov.code}</TableCell>
                                 <TableCell>{prov.name}</TableCell>
                                 <TableCell>{getDepartmentName(prov.department)}</TableCell>
                                 <TableCell align="right">
@@ -207,6 +212,17 @@ const Provincias = () => {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         margin="normal"
                         required
+                        helperText="Ej: Trujillo, Chiclayo, Pacasmayo"
+                    />
+                    <TextField
+                        fullWidth
+                        label="Código de la Provincia"
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        margin="normal"
+                        required
+                        inputProps={{ maxLength: 10 }}
+                        helperText="Código único (max 10 caracteres). Ej: TRU, CHIC, PAC"
                     />
                 </DialogContent>
                 <DialogActions>
@@ -214,7 +230,7 @@ const Provincias = () => {
                     <Button
                         onClick={handleSubmit}
                         variant="contained"
-                        disabled={!formData.name.trim() || !formData.department}
+                        disabled={!formData.name.trim() || !formData.code.trim() || !formData.department}
                     >
                         {editingId ? 'Actualizar' : 'Crear'}
                     </Button>
