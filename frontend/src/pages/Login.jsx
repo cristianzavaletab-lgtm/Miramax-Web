@@ -12,12 +12,22 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("Form submitted");
         setError('');
-        const result = await login(username, password);
-        if (result.success) {
-            navigate('/dashboard');
-        } else {
-            setError(result.error);
+        try {
+            console.log("Calling login function...");
+            const result = await login(username, password);
+            console.log("Login result:", result);
+            if (result.success) {
+                console.log("Login successful, navigating to dashboard");
+                navigate('/dashboard');
+            } else {
+                console.log("Login failed with error:", result.error);
+                setError(result.error);
+            }
+        } catch (err) {
+            console.error("Unexpected error in handleSubmit:", err);
+            setError("Error inesperado en la aplicación");
         }
     };
 
