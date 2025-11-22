@@ -43,19 +43,15 @@ export const AuthProvider = ({ children }) => {
             console.error("Login failed", error);
             let errorMessage = 'Error al iniciar sesión';
             if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
                 if (error.response.status === 401) {
                     errorMessage = 'Credenciales inválidas';
                 } else {
                     errorMessage = `Error del servidor: ${error.response.status}`;
                 }
             } else if (error.request) {
-                // The request was made but no response was received
                 errorMessage = 'No se pudo conectar con el servidor. Verifique su conexión.';
             } else {
-                // Something happened in setting up the request that triggered an Error
-                errorMessage = error.message;
+                errorMessage = error.message || 'Error desconocido';
             }
             return { success: false, error: errorMessage };
         }
