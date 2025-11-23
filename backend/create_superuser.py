@@ -15,4 +15,8 @@ if not User.objects.filter(username=username).exists():
     User.objects.create_superuser(username, email, password)
     print('Superuser created successfully')
 else:
-    print(f'Superuser {username} already exists')
+    print(f'Superuser {username} already exists. Updating password...')
+    user = User.objects.get(username=username)
+    user.set_password(password)
+    user.save()
+    print(f'Password for {username} updated successfully')
