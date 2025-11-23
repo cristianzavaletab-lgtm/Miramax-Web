@@ -10,10 +10,12 @@ api.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             // Token invalid or expired, clear storage and redirect to login page
             // BUT ignore if the error comes from the login endpoint itself
+            /*
             if (!error.config.url.includes('token/')) {
                 localStorage.removeItem('access_token');
                 window.location.href = '/login';
             }
+            */
         }
         return Promise.reject(error);
     }
